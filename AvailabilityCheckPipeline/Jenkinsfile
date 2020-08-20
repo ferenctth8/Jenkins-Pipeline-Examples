@@ -1,0 +1,62 @@
+pipeline {
+    agent any
+    
+    environment {
+		//Update the values according to your installiation locations
+        LIQUIBASE_HOME = 'C:/Self_Install_Programs/Liquibase/liquibase-3.8.2' //field value for the successful case
+        //LIQUIBASE_HOME = 'C:/Self_Install_Programs/Liquibase' //field value for the unstability case
+    }
+    
+    stages {
+        stage ('Java Availability Check'){
+            steps {
+                script{
+                    bat('java -version')
+                    def CURRENT_DATE = java.time.LocalDate.now()
+                    def dateFormatter = java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd")
+                    println('The current date is:' + dateFormatter.format(CURRENT_DATE))
+                }
+            }
+        }
+        
+        stage('Liquibase Availability Check'){
+            steps{
+                script {
+                    try {
+                        echo ("${env.LIQUIBASE_HOME}")
+                        def ret = bat(script:"cd ${env.LIQUIBASE_HOME} && liquibase --version", returnStatus: true) as Integer
+                        echo "The result of the current build is: ${ret}"
+                        if (ret == 0){
+                            currentBuild.result = 'SUCCESS'
+                        } else {
+                            throw new Exception("Batch script execution finished with non-zero return code:${ret}!")
+                        }
+                    } catch (Exception e) {
+                        println('Exception caught unexpectedly:' + e)
+                        currentBuild.result = 'UNSTABLE'
+                    }
+                }
+            }
+        }
+        
+        stage('Successful Bonus'){
+            when { expression {currentBuild.result == 'SUCCESS'} }
+            steps {
+                script {
+                    echo "The current build was overall successful - congratulations!"
+                    echo "${currentBuild.result}"
+                }
+            }
+        }
+        
+        stage('Unstability Penalty'){
+            when { expression {currentBuild.result == 'UNSTABLE'}}
+            steps {
+                script {
+                    echo "The current build has unfortunately been clasified as unstable - please consult the detailed logs for this reason!"
+                    echo "${currentBuild.result}"
+                }
+            }
+        }
+    }
+}

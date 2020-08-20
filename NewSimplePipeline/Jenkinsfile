@@ -1,0 +1,5 @@
+node('master') {    
+    bat 'mvn verify'
+    
+    step([$class: 'JUnitResultArchiver', allowEmptyResults: true, keepLongStdio: true, testResults: 'RESTfulTicketingSystem/target/test-reports/*.xml'])
+}

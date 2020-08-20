@@ -1,0 +1,21 @@
+@Library('pipeline-library-demo@master') _
+import com.cleverbuilder.*;
+
+pipeline {
+    agent any
+    stages {
+        stage('First Demo Part') {
+            steps {
+                echo 'Hello World'
+                sayHello 'Frantisku'
+                println GlobalVars.foo
+                println PAPSConstants.SANITY_CHECK_TIMEOUT
+                echo "The initial value for field PAPSConstants.PAPS_DEPLOY_HOST was ${PAPSConstants.PAPS_DEPLOY_HOST}"
+                script {
+                    PAPSConstants.PAPS_DEPLOY_HOST = 'http://localhost:8080'
+                }
+                echo 'The new value for the PAPS_DEPLOY_HOST field is ' + PAPSConstants.PAPS_DEPLOY_HOST
+            }
+        }
+    }
+}

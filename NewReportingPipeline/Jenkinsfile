@@ -1,0 +1,21 @@
+node('master') {
+	//Add your own credentialsId, SCM repo URL and e-mail before running the current pipeline 
+    stage('checkout') {
+        git credentialsId: 'add-your-own', url: 'your-github-repo-url/repo.git'
+    }
+    
+    stage('Build and Test'){
+        bat 'mvn clean install -DskipTests'
+    }
+    
+    //stage('Report Generation') {
+    //  junit '**/target/surefire-reports/TEST-*.xml'
+    //  archiveArtifacts 'target/*.jar'
+    //}
+    
+    stage('Email'){
+        emailext (body: '''Build execution completed with the following stages: Checkout + Build and Test + Report Generation. 
+                       Report generation fixed successfully - now sending confirmation e-mail...''', 
+                  subject: 'Build Execution Completed', to: 'add_own@email.com')
+    }
+}
